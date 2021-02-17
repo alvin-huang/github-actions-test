@@ -1,0 +1,43 @@
+# The outline of this workflow is something that the GitHub Security team warns against
+# here: https://securitylab.github.com/research/github-actions-preventing-pwn-requests. But
+# due to this workflow only running a git diff check and not building or publishing anything,
+# there is no harm in checking out the PR HEAD code.
+#
+# All the code checked out in this workflow should be considered untrusted. This workflow must
+# never call any makefiles or scripts. It must never be changed to run any code from the checkout.
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+    # Runs on PRs to master and all release branches
+    branches:
+      - main
+
+jobs:
+  # checks that a .changelog entry is present for a PR
+  changelog-check:
+    # If there  a `pr/no-changelog` label we ignore this check
+    if: "!${{ contains(github.event.pull_request.labels.*.name, 'pr/no-changelog') }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # by default the checkout action doesn't checkout all branches
+      - name: Check for changelog entry in diff
+        run: |
+          echo "running changelog check"
+  # checks that a 'type/docs-cherrypick' label is attached to PRs with website/ changes
+  website-check:
+    # If there's a `type/docs-cherrypick` label we ignore this check
+    if: "!contains(github.event.pull_request.labels.*.name, 'type/docs-cherrypick')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # by default the checkout action doesn't checkout all branches
+      - name: Check for website/ dir change in diff
+        run: |
+          echo "running website check"
