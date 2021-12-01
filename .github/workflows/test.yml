@@ -1,0 +1,22 @@
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Trigger CircleCI Load Test Pipeline
+        env:
+          REQUEST_BODY: |
+            {
+              "ref": "${{github.ref}}",
+              "inputs": {
+                "service": "cloud"
+              }
+            }
+        run: |
+          echo "print regular"
+          echo $REQUEST_BODY
+          echo "print tojson"
+          echo "${{ toJSON(env.REQUEST_BODY) }}"
