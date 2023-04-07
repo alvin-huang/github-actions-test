@@ -1,0 +1,13 @@
+name: tag2
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+.*"
+
+jobs:
+  foo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: foo
+        run: |-
+          echo "github refname is: ${{ github.ref_name }}"
